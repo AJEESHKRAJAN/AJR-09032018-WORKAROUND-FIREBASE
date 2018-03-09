@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "764993603269",
+    "firebase_url": "https://ajr-09032018-firebase.firebaseio.com",
+    "project_id": "ajr-09032018-firebase",
+    "storage_bucket": "ajr-09032018-firebase.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:764993603269:android:b94b22d7d555d8c0",
+        "android_client_info": {
+          "package_name": "com.workaround.ajeesh.ajr_09032018_workaround_firebase"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "764993603269-m59rg4smviepv45kf4euiaqgfkvlb92e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCNt4ZmDZ1VfFiEXcNbBthfWr02bTgx2t0"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
