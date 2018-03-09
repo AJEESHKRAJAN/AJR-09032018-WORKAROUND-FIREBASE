@@ -1,6 +1,7 @@
 package com.workaround.ajeesh.ajr_09032018_workaround_firebase;
 
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -11,6 +12,10 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
 import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Helper.ValidationHelper;
 import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Logger.LogHelper;
 
@@ -50,7 +55,7 @@ public class ActivityRegister extends AppCompatActivity {
                             LogHelper.LogThreadId(logName, "All conditions met. Good to register in Firebase now.");
                             registerNewUser(mEmail.getText().toString(), mPassword.getText().toString());
                         } else {
-                            Toast.makeText(ActivityRegister.this, "Invalid Domain. Please contact your supervisor..", Toast.LENGTH_LONG).show();
+                            Toast.makeText(ActivityRegister.this, "Password doesn't match.", Toast.LENGTH_LONG).show();
                         }
                     } else {
                         Toast.makeText(ActivityRegister.this, "Invalid Domain. Please contact your supervisor..", Toast.LENGTH_LONG).show();
@@ -65,7 +70,22 @@ public class ActivityRegister extends AppCompatActivity {
 
     private void registerNewUser(final String email, String password) {
         showDialog();
-
+        FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                LogHelper.LogThreadId(logName, "Firebase :  Auth : OnComplete Override method.");
+                if (task.isSuccessful()) {
+                    LogHelper.LogThreadId(logName,"Is User Creation Successful - " + task.isSuccessful());
+                    LogHelper.LogThreadId(logName,"User Creation for : " + FirebaseAuth.getInstance().getCurrentUser().getUid());
+                    FirebaseAuth.getInstance().signOut();
+                    redirectLoginScreen();
+                }
+                if(!task.isSuccessful()){
+                    Toast.makeText(ActivityRegister.this,"Cannot Create new user", Toast.LENGTH_LONG).show();
+                }
+                hideDialog();
+            }
+        });
     }
 
     /**

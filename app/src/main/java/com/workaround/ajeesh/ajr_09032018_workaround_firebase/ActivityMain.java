@@ -1,5 +1,6 @@
 package com.workaround.ajeesh.ajr_09032018_workaround_firebase;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -22,6 +23,15 @@ public class ActivityMain extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        TextView register = (TextView) findViewById(R.id.link_register);
+        register.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(ActivityMain.this, ActivityRegister.class);
+                startActivity(intent);
+            }
+        });
 
     }
 
