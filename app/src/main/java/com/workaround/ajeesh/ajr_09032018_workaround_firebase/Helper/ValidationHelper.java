@@ -14,7 +14,7 @@ public class ValidationHelper {
 
     public boolean IsEmpty(String placeHolder) {
         boolean hasEmpty = placeHolder.equals("");
-        LogHelper.LogThreadId(logName, "Place holder empty check is : " + hasEmpty);
+        LogHelper.LogThreadId(logName, "Place holder empty check is : " + (hasEmpty ? "Vacant" : "Filled"));
         return hasEmpty;
     }
 
