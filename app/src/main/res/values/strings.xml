@@ -37,4 +37,6 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+    <string name="title_activity_launch_dashboard">ActivityLaunchDashboard</string>
+    <string name="acc_set">Account Settings</string>
 </resources>

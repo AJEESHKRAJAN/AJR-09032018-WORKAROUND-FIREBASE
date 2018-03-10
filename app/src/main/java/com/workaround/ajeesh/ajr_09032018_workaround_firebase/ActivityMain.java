@@ -146,6 +146,11 @@ public class ActivityMain extends AppCompatActivity {
                     if (currentUser.isEmailVerified()) {
                         LogHelper.LogThreadId(logName, "onAuthStateChanged - Signed in as " + currentUser.getUid());
                         Toast.makeText(ActivityMain.this, "Authenticated with " + currentUser.getEmail(), Toast.LENGTH_LONG).show();
+
+                        Intent theIntent = new Intent(ActivityMain.this, ActivityLaunchDashboard.class);
+                        startActivity(theIntent);
+                        finish();
+
                     } else {
                         Toast.makeText(ActivityMain.this, "Check the verification email sent to your registered email address.",
                                 Toast.LENGTH_LONG).show();
