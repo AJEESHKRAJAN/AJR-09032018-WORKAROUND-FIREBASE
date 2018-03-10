@@ -16,6 +16,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Helper.ValidationHelper;
 import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Logger.LogHelper;
 
@@ -75,17 +76,39 @@ public class ActivityRegister extends AppCompatActivity {
             public void onComplete(@NonNull Task<AuthResult> task) {
                 LogHelper.LogThreadId(logName, "Firebase :  Auth : OnComplete Override method.");
                 if (task.isSuccessful()) {
-                    LogHelper.LogThreadId(logName,"Is User Creation Successful - " + task.isSuccessful());
-                    LogHelper.LogThreadId(logName,"User Creation for : " + FirebaseAuth.getInstance().getCurrentUser().getUid());
+                    LogHelper.LogThreadId(logName, "Is User Creation Successful - " + task.isSuccessful());
+                    LogHelper.LogThreadId(logName, "User Creation for : " + FirebaseAuth.getInstance().getCurrentUser().getUid());
+
+                    SendVerificationEmail();
                     FirebaseAuth.getInstance().signOut();
+
                     redirectLoginScreen();
                 }
-                if(!task.isSuccessful()){
-                    Toast.makeText(ActivityRegister.this,"Cannot Create new user", Toast.LENGTH_LONG).show();
+                if (!task.isSuccessful()) {
+                    Toast.makeText(ActivityRegister.this, "Cannot Create new user", Toast.LENGTH_LONG).show();
                 }
                 hideDialog();
             }
         });
+    }
+
+    private void SendVerificationEmail() {
+        LogHelper.LogThreadId(logName, "Send a verification email to the user.");
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        if (user != null) {
+            user.sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if (task.isSuccessful()) {
+                        Toast.makeText(ActivityRegister.this, "Sent verification email", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(ActivityRegister.this, "Couldn't send verification email", Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
+        }
     }
 
     /**

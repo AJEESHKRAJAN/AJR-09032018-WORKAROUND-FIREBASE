@@ -18,6 +18,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Dialog.ResendVerificationEmailDialog;
 import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Helper.ValidationHelper;
 import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Logger.LogHelper;
 
@@ -92,7 +93,8 @@ public class ActivityMain extends AppCompatActivity {
         View.OnClickListener listener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                Intent theIntent = new Intent(ActivityMain.this, ActivityRegister.class);
+                startActivity(theIntent);
             }
         };
         return listener;
@@ -102,7 +104,8 @@ public class ActivityMain extends AppCompatActivity {
         View.OnClickListener listener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                ResendVerificationEmailDialog dialog = new ResendVerificationEmailDialog();
+                dialog.show(getSupportFragmentManager(), "dialog_resend_verification_email");
             }
         };
         return listener;
@@ -140,7 +143,15 @@ public class ActivityMain extends AppCompatActivity {
                 FirebaseUser currentUser = firebaseAuth.getCurrentUser();
 
                 if (currentUser != null) {
-                    LogHelper.LogThreadId(logName, "onAuthStateChanged - Signed in as " + currentUser.getUid());
+                    if (currentUser.isEmailVerified()) {
+                        LogHelper.LogThreadId(logName, "onAuthStateChanged - Signed in as " + currentUser.getUid());
+                        Toast.makeText(ActivityMain.this, "Authenticated with " + currentUser.getEmail(), Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(ActivityMain.this, "Check the verification email sent to your registered email address.",
+                                Toast.LENGTH_LONG).show();
+                        LogHelper.LogThreadId(logName, "onAuthStateChanged - Email not verified for the user " + currentUser.getUid());
+                    }
+
                 } else {
                     LogHelper.LogThreadId(logName, "onAuthStateChanged - Signed out");
                 }
