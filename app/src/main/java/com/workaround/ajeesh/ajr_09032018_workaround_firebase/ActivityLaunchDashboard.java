@@ -106,6 +106,8 @@ public class ActivityLaunchDashboard extends AppCompatActivity {
                 break;
             }
             case R.id.actionAccountSettings: {
+                Intent theIntent = new Intent(this, ActivitySettings.class);
+                startActivity(theIntent);
                 break;
             }
             default:

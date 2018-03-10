@@ -72,6 +72,9 @@ public class ActivityMain extends AppCompatActivity {
                                 public void onComplete(@NonNull Task<AuthResult> task) {
                                     LogHelper.LogThreadId(logName, "Sign in status..." + task.isSuccessful());
                                     hideDialog();
+                                    Intent theIntent = new Intent(ActivityMain.this, ActivityLaunchDashboard.class);
+                                    startActivity(theIntent);
+                                    finish();
                                 }
                             })
                             .addOnFailureListener(new OnFailureListener() {
