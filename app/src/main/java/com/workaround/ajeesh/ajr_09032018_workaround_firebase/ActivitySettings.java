@@ -1,7 +1,6 @@
 package com.workaround.ajeesh.ajr_09032018_workaround_firebase;
 
 import android.content.Intent;
-import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,6 +19,8 @@ import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.ProviderQueryResult;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Helper.ValidationHelper;
 import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Logger.LogHelper;
 
@@ -29,10 +30,11 @@ public class ActivitySettings extends AppCompatActivity {
     private FirebaseUser user;
     private ValidationHelper helper;
 
-    private EditText mEmail, mCurrentPassword;
+    private EditText mUserName, mUserPhone, mEmail, mCurrentPassword;
     private Button mSave;
     private ProgressBar mProgressBar;
     private TextView mResetPasswordLink;
+    private DatabaseReference mDbFirebaseReference;
 
 
     @Override
@@ -42,16 +44,31 @@ public class ActivitySettings extends AppCompatActivity {
         LogHelper.LogThreadId(logName, "User Settings Activity has been initiated.");
         user = FirebaseAuth.getInstance().getCurrentUser();
         helper = new ValidationHelper();
+        mDbFirebaseReference = FirebaseDatabase.getInstance().getReference();
         setupFirebaseAuth();
 
+
+
+        mUserName = findViewById(R.id.input_user_name);
+        mUserPhone = findViewById(R.id.input_user_phone);
         mEmail = findViewById(R.id.input_email);
         mCurrentPassword = findViewById(R.id.input_password);
         mSave = findViewById(R.id.btn_save);
         mProgressBar = findViewById(R.id.progressBar);
         mResetPasswordLink = findViewById(R.id.change_password);
 
+
+        showCurrentUserEmail();
+
+
         mSave.setOnClickListener(SaveEmailChange());
         mResetPasswordLink.setOnClickListener(ResetPassword());
+    }
+
+    private void showCurrentUserEmail() {
+        if (user != null) {
+            mEmail.setText(user.getEmail());
+        }
     }
 
     private View.OnClickListener ResetPassword() {
@@ -89,7 +106,7 @@ public class ActivitySettings extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 LogHelper.LogThreadId(logName, "SaveEmailChange : started.");
-                if (!helper.IsEmpty(mEmail.getText().toString()) && !helper.IsEmpty(mCurrentPassword.getText().toString())) {
+                if (!helper.isEmpty(mEmail.getText().toString()) && !helper.isEmpty(mCurrentPassword.getText().toString())) {
                     if (helper.isValidDomain(mEmail.getText().toString())) {
                         if (!user.getEmail().equalsIgnoreCase(mEmail.getText().toString())) {
 
@@ -174,6 +191,29 @@ public class ActivitySettings extends AppCompatActivity {
                                     });
 
                         } else {
+                            /*---------Changing User name and phone number in Firebase db ------------*/
+                            if (!helper.isEmpty(mUserName.getText().toString())) {
+
+                                mDbFirebaseReference
+                                        .child(getString(R.string.dbnode_users))
+                                        .child(user.getUid())
+                                        .child(getString(R.string.field_name))
+                                        .setValue(mUserName.getText().toString());
+                                LogHelper.LogThreadId(logName,
+                                        "User name is updated");
+
+                            }
+                            if (!helper.isEmpty(mUserPhone.getText().toString())) {
+
+                                mDbFirebaseReference
+                                        .child(getString(R.string.dbnode_users))
+                                        .child(user.getUid())
+                                        .child(getString(R.string.field_phone))
+                                        .setValue(mUserPhone.getText().toString());
+                                LogHelper.LogThreadId(logName,
+                                        "User phone is updated.");
+
+                            }
                             Toast.makeText(ActivitySettings.this, "Please enter a new Email.", Toast.LENGTH_SHORT).show();
                         }
                     } else {

@@ -63,7 +63,7 @@ public class ActivityMain extends AppCompatActivity {
         View.OnClickListener listener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!helper.IsEmpty(mEmail.getText().toString()) && !helper.IsEmpty(mPassword.getText().toString())) {
+                if (!helper.isEmpty(mEmail.getText().toString()) && !helper.isEmpty(mPassword.getText().toString())) {
                     LogHelper.LogThreadId(logName, "Sign in triggered...");
                     showDialog();
                     FirebaseAuth.getInstance().signInWithEmailAndPassword(mEmail.getText().toString(), mPassword.getText().toString())

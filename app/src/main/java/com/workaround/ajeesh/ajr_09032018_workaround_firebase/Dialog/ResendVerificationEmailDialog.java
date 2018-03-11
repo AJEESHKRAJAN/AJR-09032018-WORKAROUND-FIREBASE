@@ -9,7 +9,6 @@ import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,11 +18,9 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.EmailAuthCredential;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.workaround.ajeesh.ajr_09032018_workaround_firebase.ActivityRegister;
 import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Helper.ValidationHelper;
 import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Logger.LogHelper;
 import com.workaround.ajeesh.ajr_09032018_workaround_firebase.R;
@@ -65,7 +62,7 @@ public class ResendVerificationEmailDialog extends DialogFragment {
         View.OnClickListener listener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!helper.IsEmpty(mEmailVerification.getText().toString()) && !helper.IsEmpty(mPasswordVerification.getText().toString())) {
+                if (!helper.isEmpty(mEmailVerification.getText().toString()) && !helper.isEmpty(mPasswordVerification.getText().toString())) {
                     LogHelper.LogThreadId(logName, "Entered resend verification details.");
                     authenticateAndResendEmailVerification(mEmailVerification.getText().toString(), mPasswordVerification.getText().toString());
                 } else {

@@ -12,7 +12,7 @@ public class ValidationHelper {
     private static final String logName = "FIREB-HLPR-VALIDATION";
     private static final String domainName = "gmail.com";
 
-    public boolean IsEmpty(String placeHolder) {
+    public boolean isEmpty(String placeHolder) {
         boolean hasEmpty = placeHolder.equals("");
         LogHelper.LogThreadId(logName, "Place holder empty check is : " + (hasEmpty ? "Vacant" : "Filled"));
         return hasEmpty;

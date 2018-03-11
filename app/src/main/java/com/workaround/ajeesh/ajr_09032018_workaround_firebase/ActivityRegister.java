@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -13,12 +12,15 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.FirebaseDatabase;
 import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Helper.ValidationHelper;
 import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Logger.LogHelper;
+import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Models.User;
 
 public class ActivityRegister extends AppCompatActivity {
     private static final String logName = "FIREB-ACT-REG";
@@ -50,7 +52,7 @@ public class ActivityRegister extends AppCompatActivity {
         View.OnClickListener listener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!helper.IsEmpty(mEmail.getText().toString()) && !helper.IsEmpty(mPassword.getText().toString()) && !helper.IsEmpty(mConfirmPassword.getText().toString())) {
+                if (!helper.isEmpty(mEmail.getText().toString()) && !helper.isEmpty(mPassword.getText().toString()) && !helper.isEmpty(mConfirmPassword.getText().toString())) {
                     if (helper.isValidDomain(mEmail.getText().toString())) {
                         if (helper.doStringsMatch(mPassword.getText().toString(), mConfirmPassword.getText().toString())) {
                             LogHelper.LogThreadId(logName, "All conditions met. Good to register in Firebase now.");
@@ -80,9 +82,36 @@ public class ActivityRegister extends AppCompatActivity {
                     LogHelper.LogThreadId(logName, "User Creation for : " + FirebaseAuth.getInstance().getCurrentUser().getUid());
 
                     SendVerificationEmail();
-                    FirebaseAuth.getInstance().signOut();
 
-                    redirectLoginScreen();
+
+                    User user = new User();
+                    user.setName(email.substring(0, email.indexOf('@')));
+                    user.setPhone("9790793380");
+                    user.setProfile_image("");
+                    user.setSecurity_level("1");
+                    user.setUser_id(FirebaseAuth.getInstance().getCurrentUser().getUid());
+
+                    FirebaseDatabase.getInstance().getReference()
+                            .child(getString(R.string.dbnode_users))
+                            .child(FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(user)
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    LogHelper.LogThreadId(logName, "New user has been added to firebase database.");
+
+                                    FirebaseAuth.getInstance().signOut();
+                                    redirectLoginScreen();
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Toast.makeText(ActivityRegister.this, "Failed to add user in firebase database"
+                                            , Toast.LENGTH_SHORT).show();
+                                    FirebaseAuth.getInstance().signOut();
+                                    redirectLoginScreen();
+                                }
+                            });
                 }
                 if (!task.isSuccessful()) {
                     Toast.makeText(ActivityRegister.this, "Cannot Create new user", Toast.LENGTH_LONG).show();

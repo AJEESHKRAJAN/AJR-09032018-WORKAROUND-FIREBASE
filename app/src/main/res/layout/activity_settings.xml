@@ -21,6 +21,7 @@
                 android:layout_height="match_parent"
                 android:padding="20dp">
 
+
                 <TextView
                     android:id="@+id/textHeader"
                     android:layout_width="wrap_content"
@@ -31,13 +32,38 @@
                     android:textColor="@color/Black"
                     android:textSize="25sp" />
 
+                <ImageView
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:id="@+id/profile_image"
+                    android:layout_below="@+id/textHeader"
+                    android:layout_marginTop="15dp"
+                    android:layout_centerHorizontal="true"
+                    android:scaleType="centerCrop"/>
+
+
+                <EditText
+                    android:id="@+id/input_user_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/profile_image"
+                    android:layout_marginTop="20dp"
+                    android:hint="First and last name" />
+
+                <EditText
+                    android:id="@+id/input_user_phone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/input_user_name"
+                    android:layout_marginTop="20dp"
+                    android:hint="Primary contact phone #" />
 
                 <EditText
                     android:id="@+id/input_email"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/textHeader"
-                    android:layout_marginTop="30dp"
+                    android:layout_below="@+id/input_user_phone"
+                    android:layout_marginTop="20dp"
                     android:hint="@string/prompt_email"
                     android:inputType="textEmailAddress" />
 
