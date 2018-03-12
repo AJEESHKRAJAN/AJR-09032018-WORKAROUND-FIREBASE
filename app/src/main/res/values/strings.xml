@@ -41,10 +41,13 @@
     <string name="acc_set">Account Settings</string>
     <string name="change_password">Change Password</string>
 
+    <!-- Dialog Names -->
+    <string name="dialog_change_photo">ChangePhotoDialog</string>
+    <string name="dialog_new_chatroom">NewChatroomDialog</string>
+
     <!-- Firebase Database Nodes -->
     <string name="dbnode_users">users</string>
     <string name="dbnode_chatrooms">chatrooms</string>
-
 
     <!-- Firebase Database Fields -->
     <string name="field_chatroom_name">chatroom_name</string>

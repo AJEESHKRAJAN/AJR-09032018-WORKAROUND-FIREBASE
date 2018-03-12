@@ -2,6 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.workaround.ajeesh.ajr_09032018_workaround_firebase">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -24,7 +29,7 @@
             android:name=".ActivityLaunchDashboard"
             android:label="@string/title_activity_launch_dashboard"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".ActivitySettings"></activity>
+        <activity android:name=".ActivitySettings" />
     </application>
 
 </manifest>
