@@ -1,17 +1,17 @@
 package com.workaround.ajeesh.ajr_09032018_workaround_firebase;
 
-import android.*;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.AsyncTask;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.EmailAuthProvider;
@@ -34,11 +35,20 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageMetadata;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Dialog.ChangeImageDialog;
+import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Helper.UniversalImageLoader;
 import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Helper.ValidationHelper;
 import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Logger.LogHelper;
 import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Models.User;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 public class ActivitySettings extends AppCompatActivity implements ChangeImageDialog.onPhotoReceivedListener {
     private static final String logName = "FIREB-ACT-SETTINGS";
@@ -56,11 +66,15 @@ public class ActivitySettings extends AppCompatActivity implements ChangeImageDi
 
     private boolean mStoragePermission;
     private static final int REQUEST_CODE = 1234;
-    private static final double MB_THRESHHOLD = 5.0;
-    private static final double MB = 1000000.0;
+
     private Uri mImageFilePath;
     private Bitmap mImageBitmap;
-
+    private Bitmap mBitmap = null;
+    private static final double MB_THRESHHOLD = 5.0;
+    private static final double MB = 1000000.0;
+    private static final String mFilePath = "images/users";
+    private byte[] mBytes;
+    private double mProgress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +85,7 @@ public class ActivitySettings extends AppCompatActivity implements ChangeImageDi
         helper = new ValidationHelper();
         mDbFirebaseReference = FirebaseDatabase.getInstance().getReference();
         setupFirebaseAuth();
-
+        initUniversalImageLoader();
 
         mUserName = findViewById(R.id.input_user_name);
         mUserPhone = findViewById(R.id.input_user_phone);
@@ -85,10 +99,15 @@ public class ActivitySettings extends AppCompatActivity implements ChangeImageDi
         checkPermissions();
         retrieveUserValuesOnSettings();
 
-        mSave.setOnClickListener(SaveEmailChange());
+        mSave.setOnClickListener(SaveUserChanges());
         mResetPasswordLink.setOnClickListener(ResetPassword());
         mProfileImage.setOnClickListener(uploadProfileImage());
 
+    }
+
+    private void initUniversalImageLoader() {
+        UniversalImageLoader universalImageLoader = new UniversalImageLoader(this);
+        ImageLoader.getInstance().init(universalImageLoader.getConfig());
     }
 
     private void checkPermissions() {
@@ -153,13 +172,13 @@ public class ActivitySettings extends AppCompatActivity implements ChangeImageDi
 
     }
 
-    private View.OnClickListener SaveEmailChange() {
+    private View.OnClickListener SaveUserChanges() {
 
 
         View.OnClickListener listener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                LogHelper.LogThreadId(logName, "SaveEmailChange : started.");
+                LogHelper.LogThreadId(logName, "SaveUserChanges : started.");
                 if (!helper.isEmpty(mEmail.getText().toString()) && !helper.isEmpty(mCurrentPassword.getText().toString())) {
                     if (helper.isValidDomain(mEmail.getText().toString())) {
                         if (!user.getEmail().equalsIgnoreCase(mEmail.getText().toString())) {
@@ -268,7 +287,11 @@ public class ActivitySettings extends AppCompatActivity implements ChangeImageDi
                                         "User phone is updated.");
 
                             }
-                            Toast.makeText(ActivitySettings.this, "Please enter a new Email.", Toast.LENGTH_SHORT).show();
+                            if (mImageFilePath != null) {
+                                uploadNewPhoto(mImageFilePath);
+                            } else if (mImageBitmap != null) {
+                                uploadNewPhoto(mImageBitmap);
+                            }
                         }
                     } else {
                         Toast.makeText(ActivitySettings.this, "Invalid Domain", Toast.LENGTH_SHORT).show();
@@ -281,6 +304,7 @@ public class ActivitySettings extends AppCompatActivity implements ChangeImageDi
         };
         return listener;
     }
+
 
     private View.OnClickListener uploadProfileImage() {
         View.OnClickListener listener = new View.OnClickListener() {
@@ -360,11 +384,11 @@ public class ActivitySettings extends AppCompatActivity implements ChangeImageDi
         }
     }
 
-    private void showDialog() {
+    public void showDialog() {
         mProgressBar.setVisibility(View.VISIBLE);
     }
 
-    private void hideDialog() {
+    public void hideDialog() {
         if (mProgressBar.getVisibility() == View.VISIBLE) {
             mProgressBar.setVisibility(View.INVISIBLE);
         }
@@ -387,6 +411,7 @@ public class ActivitySettings extends AppCompatActivity implements ChangeImageDi
 
                     mUserName.setText(theUser.getName());
                     mUserPhone.setText(theUser.getPhone());
+                    ImageLoader.getInstance().displayImage(theUser.getProfile_image(), mProfileImage);
 
                 }
             }
@@ -397,7 +422,7 @@ public class ActivitySettings extends AppCompatActivity implements ChangeImageDi
             }
         });
 
-        Query queryB = mDbFirebaseReference
+       /* Query queryB = mDbFirebaseReference
                 .child(getString(R.string.dbnode_users))
                 .orderByChild(getString(R.string.field_user_id))
                 .equalTo(user.getUid());
@@ -419,7 +444,7 @@ public class ActivitySettings extends AppCompatActivity implements ChangeImageDi
             public void onCancelled(DatabaseError databaseError) {
                 LogHelper.LogThreadId(logName, "User name & phone retrieve - Cancelled.");
             }
-        });
+        });*/
 
         mEmail.setText(user.getEmail());
     }
@@ -448,4 +473,152 @@ public class ActivitySettings extends AppCompatActivity implements ChangeImageDi
             mProfileImage.setImageBitmap(bitmap);
         }
     }
+
+
+    private void uploadNewPhoto(Uri mImageFilePath) {
+        LogHelper.LogThreadId(logName, "Uploaded user selected image as profile pic");
+
+        BackgroundImageCompressor imageCompressor = new BackgroundImageCompressor(null);
+        imageCompressor.execute(mImageFilePath);
+
+    }
+
+    private void uploadNewPhoto(Bitmap mImageBitmap) {
+        LogHelper.LogThreadId(logName, "Uploaded user taken picture from camera as profile pic");
+
+        BackgroundImageCompressor imageCompressor = new BackgroundImageCompressor(mImageBitmap);
+        Uri uri = null;
+        imageCompressor.execute(uri);
+    }
+
+
+    public class BackgroundImageCompressor extends AsyncTask<Uri, Integer, byte[]> {
+        private static final String logName = "FIREB-HLPR-BKGRD-IMG-CMPRSR";
+
+
+        public BackgroundImageCompressor(Bitmap bm) {
+            if (bm != null) {
+                LogHelper.LogThreadId(logName, "Background Image compressor helper class has been called.");
+                mBitmap = bm;
+                showDialog();
+
+            }
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            showDialog();
+            LogHelper.LogThreadId(logName, "Background image compressing has been started.");
+            Toast.makeText(ActivitySettings.this, "Background image compressing has been started", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        protected byte[] doInBackground(Uri... uris) {
+            LogHelper.LogThreadId(logName, "Background image compressing - In Progress");
+            if (mBitmap == null) {
+                try {
+                    mBitmap = MediaStore.Images.Media.getBitmap(ActivitySettings.this.getContentResolver(), uris[0]);
+                    LogHelper.LogThreadId(logName, "doInBackground: bitmap size: megabytes: " + mBitmap.getByteCount() / MB + " MB");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    LogHelper.LogThreadId(logName, "Background image compressing  - doInBackground - Exception thrown." + e.getMessage());
+                    Toast.makeText(ActivitySettings.this, "Background image compressing  - doInBackground - Exception thrown." +
+                                    e.getMessage(),
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            byte[] bytes = null;
+            for (int i = 1; i < 11; i++) {
+                if (i == 10) {
+                    Toast.makeText(ActivitySettings.this, "That image is too large.", Toast.LENGTH_SHORT).show();
+                    break;
+                }
+                bytes = getBytesFromBitmap(mBitmap, 100 / i);
+                LogHelper.LogThreadId(logName, "doInBackground: megabytes: (" + (11 - i) + "0%) " + bytes.length / MB + " MB");
+                if (bytes.length / MB < MB_THRESHHOLD) {
+                    return bytes;
+                }
+            }
+            return bytes;
+        }
+
+
+        @Override
+        protected void onPostExecute(byte[] bytes) {
+            super.onPostExecute(bytes);
+            LogHelper.LogThreadId(logName, "Background Image compressor finished.");
+            hideDialog();
+            mBytes = bytes;
+            executeUploadTask();
+        }
+
+        private byte[] getBytesFromBitmap(Bitmap _bitmap, int quality) {
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            _bitmap.compress(Bitmap.CompressFormat.JPEG, quality, stream);
+            return stream.toByteArray();
+        }
+
+        private void executeUploadTask() {
+            showDialog();
+            LogHelper.LogThreadId(logName, "Executing upload task.");
+            //specify where the photo will be stored
+            StorageReference theStorageReference =
+                    FirebaseStorage.getInstance().getReference()
+                            .child(mFilePath + "/" + FirebaseAuth.getInstance().getCurrentUser().getUid() + "/rintaaje");
+
+            LogHelper.LogThreadId(logName, "The storage Reference : " + theStorageReference);
+            if (mBytes.length / MB < MB_THRESHHOLD) {
+
+                StorageMetadata theStorageMetadata = new StorageMetadata.Builder()
+                        .setContentType("image/jpg")
+                        .setContentLanguage("en")
+                        .setCustomMetadata("Image description", "RintaAje")
+                        .setCustomMetadata("Location", "India")
+                        .build();
+
+                UploadTask uploadTask = null;
+                uploadTask = theStorageReference.putBytes(mBytes, theStorageMetadata);
+
+                uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        //Inserting the download url into the firebase storage
+
+                        Uri firebaseUrl = taskSnapshot.getDownloadUrl();
+                        LogHelper.LogThreadId(logName, "Image download url in firebase : " + firebaseUrl);
+                        Toast.makeText(ActivitySettings.this, "Uploading image in firebase successful", Toast.LENGTH_SHORT).show();
+                        FirebaseDatabase.getInstance().getReference()
+                                .child(getString(R.string.dbnode_users))
+                                .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                                .child(getString(R.string.field_profile_image))
+                                .setValue(firebaseUrl.toString());
+                        hideDialog();
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        LogHelper.LogThreadId(logName, "Executing upload image task failed with exception : " + e.getMessage());
+                        Toast.makeText(ActivitySettings.this, "Uploading image in firebase failed", Toast.LENGTH_SHORT).show();
+                        hideDialog();
+                    }
+                }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                        double currentProgress = (100 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+
+                        if (currentProgress > mProgress + 15) {
+                            mProgress = (100 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                            LogHelper.LogThreadId(logName, "onProgress: Upload is " + mProgress + "% done");
+                            Toast.makeText(ActivitySettings.this, mProgress + "%", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+            } else {
+                Toast.makeText(ActivitySettings.this, "Image is too Large", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
 }
