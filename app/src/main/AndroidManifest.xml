@@ -30,7 +30,8 @@
             android:label="@string/title_activity_launch_dashboard"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".ActivitySettings" />
-        <activity android:name=".ActivityChat"></activity>
+        <activity android:name=".ActivityChat" />
+        <activity android:name=".ActivityChatroom"></activity>
     </application>
 
 </manifest>

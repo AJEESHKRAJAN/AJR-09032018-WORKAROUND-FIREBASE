@@ -41,6 +41,9 @@
     <string name="acc_set">Account Settings</string>
     <string name="change_password">Change Password</string>
 
+    <!-- Intent Extras -->
+    <string name="intent_chatroom">intent_chatroom</string>
+
     <!-- Dialog Names -->
     <string name="dialog_change_photo">ChangePhotoDialog</string>
     <string name="dialog_new_chatroom">NewChatroomDialog</string>
@@ -70,4 +73,10 @@
     <string name="email_image">email image</string>
     <string name="password_image">password image</string>
     <string name="save">Save</string>
+    <string name="new_chatroom_name">New Chatroom Name:</string>
+    <string name="security_level">Security Level</string>
+    <string name="create">Create</string>
+    <string name="are_you_sure_you_want_to_delete_this_chatroom">Are you sure you want to delete this chatroom?</string>
+    <string name="delete">DELETE</string>
+    <string name="dialog_delete_chatroom">DeleteChatroomDialog</string>
 </resources>

@@ -452,8 +452,9 @@ public class ActivitySettings extends AppCompatActivity implements ChangeImageDi
 
     @Override
     public void getImagePath(Uri imagePath) {
+        LogHelper.LogThreadId(logName, "getImagePath(Uri imagePath) - Called Initially");
         if (!imagePath.toString().equals("")) {
-            LogHelper.LogThreadId(logName, "Retrieving user selected image path from activity");
+            LogHelper.LogThreadId(logName, " getImagePath(Uri imagePath) - Retrieving user selected image path from activity");
             mImageBitmap = null;
             mImageFilePath = imagePath;
 
@@ -464,6 +465,7 @@ public class ActivitySettings extends AppCompatActivity implements ChangeImageDi
 
     @Override
     public void getImageBitmap(Bitmap bitmap) {
+        LogHelper.LogThreadId(logName, "getImageBitmap(Bitmap bitmap) - Called Initially");
         if (bitmap != null) {
             LogHelper.LogThreadId(logName, "Retrieving user image by image capturing");
             mImageFilePath = null;

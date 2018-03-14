@@ -24,7 +24,7 @@ import com.workaround.ajeesh.ajr_09032018_workaround_firebase.R;
  */
 
 public class ChangeImageDialog extends DialogFragment {
-    private static final String logName = "FIREB-DIALOG-IMAGE";
+private static final String logName = "FIREB-DIALOG-IMAGE";
 
     private TextView mUploadImageText;
     private TextView mCaptureImageText;

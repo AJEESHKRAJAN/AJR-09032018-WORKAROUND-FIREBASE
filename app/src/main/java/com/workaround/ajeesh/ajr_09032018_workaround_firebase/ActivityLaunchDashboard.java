@@ -41,11 +41,11 @@ public class ActivityLaunchDashboard extends AppCompatActivity {
         //getUserDetails();
         setUserDetails();
 
-        FloatingActionButton fab = findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fabDashboard);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "Employee Dashboard - More to come...", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
         });
