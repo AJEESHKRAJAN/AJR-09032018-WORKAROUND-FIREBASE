@@ -55,11 +55,13 @@ public class ActivityChat extends AppCompatActivity {
         mListView = findViewById(R.id.listView);
         mFab = findViewById(R.id.fob);
 
+        LogHelper.LogThreadId(logName, "ActivityChat - Initiated");
 
         init();
     }
 
     public void init() {
+        LogHelper.LogThreadId(logName, "ActivityChat - Init method called.");
         getChatrooms();
         mFab.setOnClickListener(OpenChatroomListener());
     }
@@ -69,8 +71,9 @@ public class ActivityChat extends AppCompatActivity {
         View.OnClickListener listener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                LogHelper.LogThreadId(logName, "ActivityChat - Opening new chatroom dialog");
                 NewChatroomDialog newChatroomDialog = new NewChatroomDialog();
-                newChatroomDialog.show(getSupportFragmentManager(), String.valueOf(R.string.dialog_new_chatroom));
+                newChatroomDialog.show(getSupportFragmentManager(), getString(R.string.dialog_new_chatroom));
             }
         };
         return listener;
@@ -82,6 +85,7 @@ public class ActivityChat extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent theIntent = new Intent(ActivityChat.this, ActivityChatroom.class);
                 theIntent.putExtra(getString(R.string.intent_chatroom), mChatroomArrayList.get(position));
+                LogHelper.LogThreadId(logName, "ActivityChat - Opened a new chatroom activity for the chat @ position " + position);
                 startActivity(theIntent);
             }
         };
@@ -89,9 +93,11 @@ public class ActivityChat extends AppCompatActivity {
     }
 
     private void getChatrooms() {
+        LogHelper.LogThreadId(logName, "ActivityChat - getChatrooms()");
         mChatroomArrayList = new ArrayList<>();
 
-        Query theQuery = theFireBaseDB.child(String.valueOf(R.string.dbnode_chatrooms));
+        Query theQuery = theFireBaseDB.child(getString(R.string.dbnode_chatrooms));
+        LogHelper.LogThreadId(logName, "ActivityChat - getChatrooms() - the query : " + theQuery);
 
         theQuery.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -115,26 +121,34 @@ public class ActivityChat extends AppCompatActivity {
                     theChatroom.setCreator_id(singleSnapshot.getValue(Chatroom.class).getCreator_id());
                     theChatroom.setChatroom_name(singleSnapshot.getValue(Chatroom.class).getChatroom_name());
                     */
-
+                    LogHelper.LogThreadId(logName, "ActivityChat - Chatroom retrieved from db" +
+                            "");
                     //Get the chatroom messages
                     ArrayList<ChatMessage> messageArrayList = new ArrayList<>();
-                    for (DataSnapshot innerSingleDataSnapshot : singleSnapshot.child(String.valueOf(R.string.field_chatroom_messages))
+                    for (DataSnapshot innerSingleDataSnapshot : singleSnapshot.child(getString(R.string.field_chatroom_messages))
                             .getChildren()) {
                         ChatMessage theChatMessage = new ChatMessage();
                         theChatMessage.setMessage(innerSingleDataSnapshot.getValue(ChatMessage.class).getMessage());
                         theChatMessage.setTimestamp(innerSingleDataSnapshot.getValue(ChatMessage.class).getTimestamp());
                         theChatMessage.setUser_id(innerSingleDataSnapshot.getValue(ChatMessage.class).getUser_id());
                         messageArrayList.add(theChatMessage);
+                        LogHelper.LogThreadId(logName, "ActivityChat - Chat messages retrieved from db");
                     }
                     theChatroom.setChatroom_messages(messageArrayList);
                     mChatroomArrayList.add(theChatroom);
+
+                    LogHelper.LogThreadId(logName, "ActivityChat - total chat messages for chatroom Id : " +
+                            theChatroom.getChatroom_id() + " is " + messageArrayList.size());
                 }
+                LogHelper.LogThreadId(logName, "ActivityChat - Total Chatrooms in db for the user id " +
+                        theFireBaseUser.getUid() + " is " + mChatroomArrayList.size());
                 setupChatroomList();
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                LogHelper.LogThreadId(logName, "ActivityChat - Cancelled retrieving chatrooms and its " +
+                        "messages from db reason : " + databaseError.getMessage() + " " + databaseError.getDetails());
             }
         });
     }
@@ -142,6 +156,7 @@ public class ActivityChat extends AppCompatActivity {
     private void setupChatroomList() {
         mChatroomListAdapter = new ChatroomListAdapter(ActivityChat.this, R.layout.layout_adapter_chatroom_list, mChatroomArrayList);
         mListView.setAdapter(mChatroomListAdapter);
+        LogHelper.LogThreadId(logName, "ActivityChat - setupChatroomList");
         mListView.setOnItemClickListener(ListChatsListener());
     }
 
@@ -170,9 +185,11 @@ public class ActivityChat extends AppCompatActivity {
 
 
     public void showDeleteChatroomDialog(String chatroom_id) {
+        LogHelper.LogThreadId(logName, "ActivityChat - showDeleteChatroomDialog");
         DeleteChatroomDialog deleteChatroomDialog = new DeleteChatroomDialog();
         Bundle args = new Bundle();
-        args.putString(String.valueOf(R.string.field_chatroom_id), chatroom_id);
+        args.putString(getString(R.string.field_chatroom_id), chatroom_id);
+        LogHelper.LogThreadId(logName, "ActivityChat - showDeleteChatroomDialog - Passing bundle as " + args);
         deleteChatroomDialog.setArguments(args);
         deleteChatroomDialog.show(getSupportFragmentManager(), getString(R.string.dialog_delete_chatroom));
     }

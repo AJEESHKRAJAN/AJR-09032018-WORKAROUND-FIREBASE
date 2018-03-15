@@ -102,13 +102,14 @@ public class NewChatroomDialog extends DialogFragment {
     }
 
     private View.OnClickListener CreateNewChatroomListener() {
+        LogHelper.LogThreadId(logName, "NewChatroomDialog - CreateNewChatroomListener - Initiated");
         View.OnClickListener listener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mChatRoomNameDialog.getText().equals("")) {
-
+                if (!mChatRoomNameDialog.getText().toString().equals("")) {
+                    LogHelper.LogThreadId(logName, "NewChatroomDialog - CreateNewChatroomListener - Chatroom name is not empty");
                     if (mUserSecurityLevel >= mSecurityLevelSeekbarDialog.getProgress()) {
-                        LogHelper.LogThreadId(logName, "NewChatroomDialog - CreateNewChatroomListener - Started");
+                        LogHelper.LogThreadId(logName, "NewChatroomDialog - CreateNewChatroomListener - chatroom security level passed");
 
                         //get the new chatroom unique id
                         String chatRoomId = theFbDbReference
@@ -126,13 +127,13 @@ public class NewChatroomDialog extends DialogFragment {
                         theChatroom.setSecurity_level(String.valueOf(mSecurityLevelSeekbarDialog.getProgress()));
 
                         //Insert the new chatroom into the database
-                        theFbDbReference.child(String.valueOf(R.string.dbnode_chatrooms))
+                        theFbDbReference.child(getString(R.string.dbnode_chatrooms))
                                 .child(chatRoomId)
                                 .setValue(theChatroom);
 
                         //Create a unique id for the message
                         String messageId = theFbDbReference
-                                .child(String.valueOf(R.string.dbnode_chatrooms))
+                                .child(getString(R.string.dbnode_chatrooms))
                                 .push()
                                 .getKey();
 
@@ -146,19 +147,21 @@ public class NewChatroomDialog extends DialogFragment {
 
 
                         theFbDbReference
-                                .child(String.valueOf(R.string.dbnode_chatrooms))
+                                .child(getString(R.string.dbnode_chatrooms))
                                 .child(chatRoomId)
-                                .child(String.valueOf(R.string.field_chatroom_messages))
+                                .child(getString(R.string.field_chatroom_messages))
                                 .child(messageId)
                                 .setValue(theChatMessage);
+                        LogHelper.LogThreadId(logName, "NewChatroomDialog - Finished creating new chatroom");
 
                         ((ActivityChat) getActivity()).init();
-
-                        LogHelper.LogThreadId(logName, "NewChatroomDialog - Finished creating new chatroom");
                         getDialog().dismiss();
                     } else {
                         Toast.makeText(getActivity(), "insuffient security level", Toast.LENGTH_SHORT).show();
                     }
+                } else {
+                    LogHelper.LogThreadId(logName, "NewChatroomDialog - CreateNewChatroomListener - Chatroom dialog name cannot be empty");
+                    Toast.makeText(getActivity(), "Please enter chatroom name", Toast.LENGTH_SHORT).show();
                 }
             }
         };

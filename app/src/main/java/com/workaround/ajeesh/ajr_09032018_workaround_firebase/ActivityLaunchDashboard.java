@@ -19,6 +19,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Helper.UniversalImageLoader;
 import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Logger.LogHelper;
 
 public class ActivityLaunchDashboard extends AppCompatActivity {
@@ -40,6 +42,7 @@ public class ActivityLaunchDashboard extends AppCompatActivity {
 
         //getUserDetails();
         setUserDetails();
+        initUniversalImageLoader();
 
         FloatingActionButton fab = findViewById(R.id.fabDashboard);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -110,6 +113,11 @@ public class ActivityLaunchDashboard extends AppCompatActivity {
                 startActivity(theIntent);
                 break;
             }
+            case R.id.actionChat: {
+                Intent theIntent = new Intent(this, ActivityChat.class);
+                startActivity(theIntent);
+                break;
+            }
             default:
                 handled = super.onOptionsItemSelected(item);
                 break;
@@ -166,5 +174,10 @@ public class ActivityLaunchDashboard extends AppCompatActivity {
         } else {
             LogHelper.LogThreadId(logName, "User is still active in " + this.toString() + " activity.");
         }
+    }
+
+    private void initUniversalImageLoader() {
+        UniversalImageLoader universalImageLoader = new UniversalImageLoader(this);
+        ImageLoader.getInstance().init(universalImageLoader.getConfig());
     }
 }

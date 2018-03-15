@@ -35,16 +35,17 @@ public class DeleteChatroomDialog extends DialogFragment {
         super();
         setArguments(new Bundle());
         theFirebaseDB = FirebaseDatabase.getInstance().getReference();
+        LogHelper.LogThreadId(logName, "DeleteChatroomDialog - Initiated");
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mChatroomId = getArguments().getString(String.valueOf(R.string.field_chatroom_id));
+        mChatroomId = getArguments().getString(getString(R.string.field_chatroom_id));
 
         if (mChatroomId != null) {
-            LogHelper.LogThreadId(logName, "onCreate: got the chatroom id: " + mChatroomId);
+            LogHelper.LogThreadId(logName, "DeleteChatroomDialog - onCreate: got the chatroom id: " + mChatroomId);
         }
     }
 
@@ -67,10 +68,10 @@ public class DeleteChatroomDialog extends DialogFragment {
             @Override
             public void onClick(View v) {
                 theFirebaseDB
-                        .child(String.valueOf(R.string.dbnode_chatrooms))
+                        .child(getString(R.string.dbnode_chatrooms))
                         .child(mChatroomId)
                         .removeValue();
-
+                LogHelper.LogThreadId(logName, "DeleteChatroomDialog - removed the chat");
                 getDialog().dismiss();
                 ((ActivityChat) getActivity()).init();
             }
@@ -83,6 +84,7 @@ public class DeleteChatroomDialog extends DialogFragment {
             @Override
             public void onClick(View v) {
                 getDialog().dismiss();
+                LogHelper.LogThreadId(logName, "DeleteChatroomDialog - Cancelled chat");
             }
         };
         return listener;

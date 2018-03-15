@@ -1,6 +1,7 @@
 package com.workaround.ajeesh.ajr_09032018_workaround_firebase.Adapters;
 
 import android.content.Context;
+import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -44,13 +45,14 @@ public class ChatroomListAdapter extends ArrayAdapter<Chatroom> {
     private FirebaseUser theFirebaseUser;
     private DatabaseReference theFirebaseDB;
 
-    public ChatroomListAdapter(@NonNull Context context, int resource, @NonNull List<Chatroom> objects) {
+    public ChatroomListAdapter(@NonNull Context context, @LayoutRes int resource, @NonNull List<Chatroom> objects) {
         super(context, resource, objects);
         mContext = context;
         mLayoutResource = resource;
         mLayoutInflator = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         theFirebaseDB = FirebaseDatabase.getInstance().getReference();
         theFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        LogHelper.LogThreadId(logName, "ChatroomListAdapter - Adapter is created");
     }
 
     public static class ViewHolder {
@@ -64,6 +66,8 @@ public class ChatroomListAdapter extends ArrayAdapter<Chatroom> {
         final ViewHolder theViewHolder;
 
         if (convertView == null) {
+            LogHelper.LogThreadId(logName, "ChatroomListAdapter - mLayoutResource : " + mLayoutResource);
+            LogHelper.LogThreadId(logName, "ChatroomListAdapter - convertView : " + convertView);
             convertView = mLayoutInflator.inflate(mLayoutResource, parent, false);
             theViewHolder = new ViewHolder();
 
@@ -72,8 +76,10 @@ public class ChatroomListAdapter extends ArrayAdapter<Chatroom> {
             theViewHolder.numberMessages = convertView.findViewById(R.id.number_chatmessages);
             theViewHolder.mProfileImage = convertView.findViewById(R.id.profile_image);
             theViewHolder.mTrash = convertView.findViewById(R.id.icon_trash);
+            LogHelper.LogThreadId(logName, "ChatroomListAdapter - The view holder when convert view is not null : " + theViewHolder);
         } else {
             theViewHolder = (ViewHolder) convertView.getTag();
+            LogHelper.LogThreadId(logName, "ChatroomListAdapter - The view holder when convert view is null : " + theViewHolder);
         }
 
         try {
@@ -87,7 +93,7 @@ public class ChatroomListAdapter extends ArrayAdapter<Chatroom> {
 
             //Get the user Details who created Chat room
             Query theQuery = theFirebaseDB
-                    .child(String.valueOf(R.string.dbnode_users))
+                    .child(mContext.getString(R.string.dbnode_users))
                     .orderByKey()
                     .equalTo(getItem(position).getCreator_id());
 
@@ -106,7 +112,7 @@ public class ChatroomListAdapter extends ArrayAdapter<Chatroom> {
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-
+                    LogHelper.LogThreadId(logName, "ChatroomListAdapter - Cancelled finding new chatroom");
                 }
             });
 

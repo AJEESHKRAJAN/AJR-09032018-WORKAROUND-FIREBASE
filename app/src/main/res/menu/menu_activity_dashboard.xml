@@ -8,5 +8,8 @@
     <item
         android:id="@+id/actionAccountSettings"
         android:title="@string/acc_set" />
+ <item
+        android:id="@+id/actionChat"
+        android:title="@string/chat" />
 
 </menu>
