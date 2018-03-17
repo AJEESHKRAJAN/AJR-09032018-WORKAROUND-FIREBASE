@@ -45,7 +45,7 @@
         android:layout_marginTop="5dp"
         android:layout_toEndOf="@id/relLayout1"
         android:layout_toRightOf="@id/relLayout1"
-        android:background="@drawable/grey_border"
+        android:background="@color/DarkGrey"
         android:padding="10dp">
 
         <TextView

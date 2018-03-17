@@ -60,6 +60,9 @@ public class ActivityChatroom extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chatroom);
 
+        theFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        theFirebaseDB  = FirebaseDatabase.getInstance().getReference();
+
         mChatroomName = findViewById(R.id.text_chatroom_name);
         mListView = findViewById(R.id.listView);
         mMessage = findViewById(R.id.input_message);
@@ -166,6 +169,7 @@ public class ActivityChatroom extends AppCompatActivity {
             mAdapter.clear();
         }
         LogHelper.LogThreadId(logName, "ActivityChatroom - getChatroomMessages - Started");
+        theFirebaseDB = FirebaseDatabase.getInstance().getReference();
         Query theQuery = theFirebaseDB
                 .child(getString(R.string.dbnode_chatrooms))
                 .child(mChatroom.getChatroom_id())
@@ -240,6 +244,7 @@ public class ActivityChatroom extends AppCompatActivity {
         LogHelper.LogThreadId(logName, "ActivityChatroom - initMessageList - Started");
         mAdapter = new ChatroomMessageListAdapter(ActivityChatroom.this, R.layout.layout_adapter_chatmessage_list, mMessagesList);
         mListView.setAdapter(mAdapter);
+        LogHelper.LogThreadId(logName, "ActivityChatroom - initMessageList - ChatroomMessageListAdapter - Count : " + mAdapter.getCount());
         mListView.setSelection(mAdapter.getCount() - 1);
         LogHelper.LogThreadId(logName, "ActivityChatroom - initMessageList - Total messages count : " + mAdapter.getCount());
     }

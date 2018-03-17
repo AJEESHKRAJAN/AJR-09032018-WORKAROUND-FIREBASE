@@ -107,8 +107,8 @@ public class Chatroom implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeString(chatroom_name);
+        parcel.writeString(chatroom_id);
         parcel.writeString(creator_id);
         parcel.writeString(security_level);
-        parcel.writeString(chatroom_id);
     }
 }

@@ -51,7 +51,7 @@
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:layout_alignParentBottom="true"
-            android:background="@drawable/grey_border_top">
+            android:background="#A9A9A9">
 
             <ImageView
                 android:id="@+id/checkmark"
