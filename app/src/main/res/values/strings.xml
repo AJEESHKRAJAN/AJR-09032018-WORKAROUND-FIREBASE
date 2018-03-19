@@ -81,4 +81,21 @@
     <string name="dialog_delete_chatroom">DeleteChatroomDialog</string>
     <string name="new_message">new message...</string>
     <string name="chat">Chat</string>
+    <string name="field_messaging_token">messaging_token</string>
+    <string name="field_department">department</string>
+    <string name="field_server_key">server_key</string>
+    <string name="field_users">users</string>
+    <string name="field_last_message_seen">last_message_seen</string>
+
+    <!-- FCM Related String -->
+    <string name="default_notification_channel_id" translatable="false">courses.pluralsight.com.tabianconsulting.default_notification_channel_id</string>
+    <string name="default_notification_channel_name" translatable="true">courses.pluralsight.com.tabianconsulting.default_notification_channel_name</string>
+    <string name="data_type_chat_message">data_type_chat_message</string>
+    <string name="data_type_admin_broadcast">data_type_admin_broadcast</string>
+    <string name="data_title">title</string>
+    <string name="data_type">data_type</string>
+    <string name="data_message">message</string>
+    <string name="data_chatroom_id">chatroom_id</string>
+    <string name="reply_label">intent_data_payload</string>
+    <string name="label">new message...</string>
 </resources>

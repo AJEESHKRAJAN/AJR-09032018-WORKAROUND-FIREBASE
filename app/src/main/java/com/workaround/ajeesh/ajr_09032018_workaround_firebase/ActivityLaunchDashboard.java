@@ -19,6 +19,9 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Helper.UniversalImageLoader;
 import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Logger.LogHelper;
@@ -43,6 +46,7 @@ public class ActivityLaunchDashboard extends AppCompatActivity {
         //getUserDetails();
         setUserDetails();
         initUniversalImageLoader();
+        InitializeFirebaseMessagingToken();
 
         FloatingActionButton fab = findViewById(R.id.fabDashboard);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -52,6 +56,26 @@ public class ActivityLaunchDashboard extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+    }
+
+    private void InitializeFirebaseMessagingToken() {
+        LogHelper.LogThreadId(logName, "InitializeFirebaseMessagingToken - Called");
+        String token = FirebaseInstanceId.getInstance().getToken();
+        LogHelper.LogThreadId(logName, "InitializeFirebaseMessagingToken - Token : " + token);
+
+        sendRegistrationToServer(token);
+    }
+
+    private void sendRegistrationToServer(String token) {
+        LogHelper.LogThreadId(logName, "sendRegistrationToServer - Initiated");
+
+        DatabaseReference theFirebaseDb = FirebaseDatabase.getInstance().getReference();
+
+        theFirebaseDb.child(getString(R.string.dbnode_users))
+                .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                .child(getString(R.string.field_messaging_token))
+                .setValue(token);
+        LogHelper.LogThreadId(logName, "sendRegistrationToServer - The token has been registered from the launch dashboard activity");
     }
 
     private void getUserDetails() {
@@ -137,6 +161,9 @@ public class ActivityLaunchDashboard extends AppCompatActivity {
     private void signOut() {
         LogHelper.LogThreadId(logName, "signOut: signing out");
         FirebaseAuth.getInstance().signOut();
+        Intent intent = new Intent(ActivityLaunchDashboard.this, ActivityMain.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
     }
 
     private void setupFirebaseAuth() {
