@@ -19,7 +19,6 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-
         <service android:name=".Services.AjrFirebaseInstanceIdMessagingService">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
@@ -43,7 +42,8 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".ActivitySettings" />
         <activity android:name=".ActivityChat" />
-        <activity android:name=".ActivityChatroom"></activity>
+        <activity android:name=".ActivityChatroom" />
+        <activity android:name=".ActivityAdmin"></activity>
     </application>
 
 </manifest>

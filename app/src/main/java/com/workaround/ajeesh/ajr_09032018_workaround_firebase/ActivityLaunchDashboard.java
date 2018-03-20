@@ -199,7 +199,7 @@ public class ActivityLaunchDashboard extends AppCompatActivity {
             startActivity(theIntent);
             finish();
         } else {
-            LogHelper.LogThreadId(logName, "User is still active in " + this.toString() + " activity.");
+            LogHelper.LogThreadId(logName, "User is still active in " + this.getTitle() + " activity.");
         }
     }
 

@@ -272,7 +272,7 @@ public class ActivityChatroom extends AppCompatActivity {
             startActivity(intent);
             finish();
         } else {
-            LogHelper.LogThreadId(logName, "checkAuthenticationState: user is authenticated.");
+            LogHelper.LogThreadId(logName, "User is still active in " + this.getTitle() + " activity.");
         }
     }
 
