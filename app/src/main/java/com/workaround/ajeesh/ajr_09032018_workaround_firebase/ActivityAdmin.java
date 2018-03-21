@@ -2,12 +2,11 @@ package com.workaround.ajeesh.ajr_09032018_workaround_firebase;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
@@ -27,17 +26,29 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Adapters.EmployeeRecyclerAdapter;
 import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Dialog.NewDepartmentDialog;
+import com.workaround.ajeesh.ajr_09032018_workaround_firebase.FirebaseCloudMessaging.Data;
+import com.workaround.ajeesh.ajr_09032018_workaround_firebase.FirebaseCloudMessaging.FirebaseCloudMessage;
 import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Helper.ValidationHelper;
 import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Helper.VerticalSpacingDecorator;
+import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Interface.FCM;
 import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Logger.LogHelper;
 import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Models.User;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
 public class ActivityAdmin extends AppCompatActivity {
     private static final String logName = "FIREB-ACT-ADMIN";
+    private static final String BASE_URL = "https://fcm.googleapis.com/fcm/";
 
     //Firebase
     private FirebaseUser theFireBaseUser;
@@ -101,6 +112,7 @@ public class ActivityAdmin extends AppCompatActivity {
         getEmployeeList();
 
         getServerKey();
+
     }
 
     private View.OnClickListener getSelectedDepartments() {
@@ -224,7 +236,7 @@ public class ActivityAdmin extends AppCompatActivity {
                 if (!theHelper.isEmpty(message) && !theHelper.isEmpty(title)) {
 
                     //send message
-
+                    sendMessageToDepartment(title, message);
 
                     mMessage.setText("");
                     mTitle.setText("");
@@ -234,6 +246,54 @@ public class ActivityAdmin extends AppCompatActivity {
             }
         };
         return theListener;
+    }
+
+    private void sendMessageToDepartment(String title, String message) {
+        LogHelper.LogThreadId(logName, "Admin Activity : Attempting to call Retrofit to " +
+                "send the message to department over HTTP... ");
+
+        Retrofit theRetrofit = new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        FCM iFcmApi = theRetrofit.create(FCM.class);
+
+        //Attach the headers and tokens
+        HashMap<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json");
+        headers.put("Authorization", "key=" + mServerKey);
+
+        //Send Message to all the tokens
+        for (String token : mTokens) {
+            LogHelper.LogThreadId(logName, "Admin Activity : Sending the message to token : " + token);
+
+            Data theData = new Data();
+            theData.setMessage(message);
+            theData.setTitle(title);
+            theData.setData_type(getString(R.string.data_type_admin_broadcast));
+
+            FirebaseCloudMessage theCloudMessage = new FirebaseCloudMessage();
+            theCloudMessage.setTo(token);
+            theCloudMessage.setData(theData);
+
+            Call<ResponseBody> callResponse = iFcmApi.send(headers, theCloudMessage);
+
+            callResponse.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    LogHelper.LogThreadId(logName, "Admin Activity : Retrofit message : onResponse: Server Response: "
+                            + response.toString());
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    LogHelper.LogThreadId(logName, "Admin Activity : Retrofit Message : onFailure: " +
+                            "Unable to send the message: " + t.getMessage());
+                    Toast.makeText(ActivityAdmin.this, "error", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 
 
@@ -415,7 +475,7 @@ public class ActivityAdmin extends AppCompatActivity {
             startActivity(theIntent);
             finish();
         } else {
-            LogHelper.LogThreadId(logName, "User is still active in " + this.getTitle() + " activity.");
+            LogHelper.LogThreadId(logName, "User is still active in " + ActivityAdmin.this.getTitle() + " activity.");
         }
     }
 }

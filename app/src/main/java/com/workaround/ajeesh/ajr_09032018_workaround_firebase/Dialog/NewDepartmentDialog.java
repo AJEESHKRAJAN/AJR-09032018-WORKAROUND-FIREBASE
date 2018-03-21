@@ -31,7 +31,7 @@ public class NewDepartmentDialog extends DialogFragment {
     private ValidationHelper theHelper;
     //widgets
     private EditText mNewDepartment;
-    private TextView mConfirmDialog;
+    private TextView mConfirmDialog, mCancelDialog;
 
     public NewDepartmentDialog() {
         LogHelper.LogThreadId(logName, "NewDepartmentDialog : Initiated");
@@ -44,11 +44,13 @@ public class NewDepartmentDialog extends DialogFragment {
         View theView = inflater.inflate(R.layout.dialog_add_department, container, false);
 
         mNewDepartment = theView.findViewById(R.id.input_new_department);
-        mConfirmDialog =  theView.findViewById(R.id.dialogConfirm);
+        mConfirmDialog = theView.findViewById(R.id.dialogConfirm);
+        mCancelDialog = theView.findViewById(R.id.dialogCancel);
 
         LogHelper.LogThreadId(logName, "NewDepartmentDialog : View is set");
 
         mConfirmDialog.setOnClickListener(confirmSelectedDialog());
+        mCancelDialog.setOnClickListener(cancelDialog());
         return theView;
     }
 
@@ -56,7 +58,7 @@ public class NewDepartmentDialog extends DialogFragment {
         View.OnClickListener theListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!theHelper.isEmpty(mNewDepartment.getText().toString())){
+                if (!theHelper.isEmpty(mNewDepartment.getText().toString())) {
                     LogHelper.LogThreadId(logName, "NewDepartmentDialog :onClick: adding new department to the list.");
                     DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
                     reference
@@ -69,10 +71,22 @@ public class NewDepartmentDialog extends DialogFragment {
                     getDialog().dismiss();
 
                     LogHelper.LogThreadId(logName, "NewDepartmentDialog : Returning back to Admin Activity");
-                    ((ActivityAdmin)getActivity()).getDepartments();
+                    ((ActivityAdmin) getActivity()).getDepartments();
                 }
             }
         };
+        return theListener;
+    }
+
+    private View.OnClickListener cancelDialog() {
+        View.OnClickListener theListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LogHelper.LogThreadId(logName, "NewDepartmentDialog : Dialog dismissed.");
+                getDialog().dismiss();
+            }
+        };
+
         return theListener;
     }
 }

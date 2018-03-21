@@ -142,6 +142,11 @@ public class ActivityLaunchDashboard extends AppCompatActivity {
                 startActivity(theIntent);
                 break;
             }
+            case R.id.actionAdmin: {
+                Intent theIntent = new Intent(this, ActivityAdmin.class);
+                startActivity(theIntent);
+                break;
+            }
             default:
                 handled = super.onOptionsItemSelected(item);
                 break;

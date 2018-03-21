@@ -42,5 +42,11 @@ dependencies {
 
     //Android Support Design Library
     compile 'com.android.support:design:26.1.0'
+
+    //Retrofit
+    compile 'com.squareup.retrofit2:retrofit:2.4.0'
+
+    //Retrofit-Converters : GSON
+    compile 'com.squareup.retrofit2:converter-gson:2.4.0'
 }
 apply plugin: 'com.google.gms.google-services'
