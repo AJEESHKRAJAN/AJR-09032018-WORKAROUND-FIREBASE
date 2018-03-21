@@ -25,6 +25,7 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Helper.UniversalImageLoader;
 import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Logger.LogHelper;
+import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Models.Chatroom;
 
 public class ActivityLaunchDashboard extends AppCompatActivity {
     private static final String logName = "FIREB-ACT-DASHBOARD";
@@ -32,6 +33,7 @@ public class ActivityLaunchDashboard extends AppCompatActivity {
     private String userId, userName, userEmail;
     private Uri userProfileUri;
     private FirebaseUser user;
+    public static boolean isActivityRunning;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +47,7 @@ public class ActivityLaunchDashboard extends AppCompatActivity {
 
         //getUserDetails();
         setUserDetails();
+        getPendingIntent();
         initUniversalImageLoader();
         InitializeFirebaseMessagingToken();
 
@@ -154,10 +157,38 @@ public class ActivityLaunchDashboard extends AppCompatActivity {
         return handled;
     }
 
+
+    private void getPendingIntent(){
+        LogHelper.LogThreadId(logName, "getPendingIntent: checking for pending intents.");
+
+        Intent intent = getIntent();
+        if(intent.hasExtra(getString(R.string.intent_chatroom))){
+            LogHelper.LogThreadId(logName,  "getPendingIntent: pending intent detected.");
+
+            //get the chatroom
+            Chatroom chatroom = intent.getParcelableExtra(getString(R.string.intent_chatroom));
+            //navigate to the chatoom
+            Intent chatroomIntent = new Intent(ActivityLaunchDashboard.this, ActivityChatroom.class);
+            chatroomIntent.putExtra(getString(R.string.intent_chatroom), chatroom);
+            startActivity(chatroomIntent);
+        }
+    }
     @Override
     protected void onResume() {
         super.onResume();
         checkAuthenticationState();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        isActivityRunning = true;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        isActivityRunning = false;
     }
 
     /**

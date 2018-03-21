@@ -20,13 +20,16 @@ public class Chatroom implements Parcelable {
     private String creator_id;
     private String security_level;
     private List<ChatMessage> chatroom_messages;
+    private List<String> users;
 
-    public Chatroom(String chatroom_name, String chatroom_id, String creator_id, String security_level, List<ChatMessage> chatroom_messages) {
+    public Chatroom(String chatroom_name, String chatroom_id, String creator_id, String security_level,
+                    List<ChatMessage> chatroom_messages, List<String> users) {
         this.chatroom_name = chatroom_name;
         this.chatroom_id = chatroom_id;
         this.creator_id = creator_id;
         this.security_level = security_level;
         this.chatroom_messages = chatroom_messages;
+        this.users = users;
     }
 
     protected Chatroom(Parcel in) {
@@ -88,6 +91,14 @@ public class Chatroom implements Parcelable {
         this.chatroom_messages = chatroom_messages;
     }
 
+    public List<String> getUsers() {
+        return users;
+    }
+
+    public void setUsers(List<String> users) {
+        this.users = users;
+    }
+
     @Override
     public String toString() {
         return "Chatroom{" +
@@ -96,6 +107,7 @@ public class Chatroom implements Parcelable {
                 ", creator_id='" + creator_id + '\'' +
                 ", security_level='" + security_level + '\'' +
                 ", chatroom_messages=" + chatroom_messages +
+                ", users=" + users +
                 '}';
     }
 

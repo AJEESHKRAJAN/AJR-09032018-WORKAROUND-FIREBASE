@@ -29,6 +29,7 @@ public class ActivityRegister extends AppCompatActivity {
     private EditText mEmail, mPassword, mConfirmPassword;
     private Button mRegister;
     private ProgressBar mProgressBar;
+    public static boolean isActivityRunning;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -164,5 +165,17 @@ public class ActivityRegister extends AppCompatActivity {
 
     private void hideSoftKeyboard() {
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        isActivityRunning = true;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        isActivityRunning = false;
     }
 }

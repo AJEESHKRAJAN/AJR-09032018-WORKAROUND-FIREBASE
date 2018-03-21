@@ -4,9 +4,11 @@ import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -26,6 +28,7 @@ import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Models.Chatroom;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ActivityChat extends AppCompatActivity {
@@ -42,6 +45,9 @@ public class ActivityChat extends AppCompatActivity {
     //Vars
     private ArrayList<Chatroom> mChatroomArrayList;
     private ChatroomListAdapter mChatroomListAdapter;
+    public static boolean isActivityRunning;
+    private HashMap<String, String> mNumChatroomMessages;
+    private int mSecurityLevel;
 
 
     @Override
@@ -95,7 +101,11 @@ public class ActivityChat extends AppCompatActivity {
     private void getChatrooms() {
         LogHelper.LogThreadId(logName, "ActivityChat - getChatrooms()");
         mChatroomArrayList = new ArrayList<>();
-
+        mNumChatroomMessages = new HashMap<>();
+        if (mChatroomListAdapter != null) {
+            mChatroomListAdapter.clear();
+            mChatroomArrayList.clear();
+        }
         Query theQuery = theFireBaseDB.child(getString(R.string.dbnode_chatrooms));
         LogHelper.LogThreadId(logName, "ActivityChat - getChatrooms() - the query : " + theQuery);
 
@@ -125,6 +135,7 @@ public class ActivityChat extends AppCompatActivity {
                             "");
                     //Get the chatroom messages
                     ArrayList<ChatMessage> messageArrayList = new ArrayList<>();
+                    int numMessages = 0;
                     for (DataSnapshot innerSingleDataSnapshot : singleSnapshot.child(getString(R.string.field_chatroom_messages))
                             .getChildren()) {
                         ChatMessage theChatMessage = new ChatMessage();
@@ -132,9 +143,26 @@ public class ActivityChat extends AppCompatActivity {
                         theChatMessage.setTimestamp(innerSingleDataSnapshot.getValue(ChatMessage.class).getTimestamp());
                         theChatMessage.setUser_id(innerSingleDataSnapshot.getValue(ChatMessage.class).getUser_id());
                         messageArrayList.add(theChatMessage);
+                        numMessages++;
                         LogHelper.LogThreadId(logName, "ActivityChat - Chat messages retrieved from db");
                     }
                     theChatroom.setChatroom_messages(messageArrayList);
+
+                    //add the number of chatrooms messages to a hashmap for reference
+                    mNumChatroomMessages.put(theChatroom.getChatroom_id(), String.valueOf(numMessages));
+
+                    //get the list of users who have joined the chatroom
+                    List<String> users = new ArrayList<String>();
+                    for (DataSnapshot snapshot : singleSnapshot
+                            .child(getString(R.string.field_users)).getChildren()) {
+                        String user_id = snapshot.getKey();
+                        LogHelper.LogThreadId(logName, "onDataChange: user currently in chatroom: " + user_id);
+                        users.add(user_id);
+                    }
+                    if (users.size() > 0) {
+                        theChatroom.setUsers(users);
+                    }
+
                     mChatroomArrayList.add(theChatroom);
 
                     LogHelper.LogThreadId(logName, "ActivityChat - total chat messages for chatroom Id : " +
@@ -168,6 +196,18 @@ public class ActivityChat extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        isActivityRunning = true;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        isActivityRunning = false;
+    }
+
     private void checkAuthenticationState() {
         LogHelper.LogThreadId(logName, "Checking Authentication State");
 
@@ -192,5 +232,64 @@ public class ActivityChat extends AppCompatActivity {
         LogHelper.LogThreadId(logName, "ActivityChat - showDeleteChatroomDialog - Passing bundle as " + args);
         deleteChatroomDialog.setArguments(args);
         deleteChatroomDialog.show(getSupportFragmentManager(), getString(R.string.dialog_delete_chatroom));
+    }
+
+    public void joinChatroom(final Chatroom chatroom) {
+        //make sure the chatroom exists before joining
+        theFireBaseDB = FirebaseDatabase.getInstance().getReference();
+
+        Query query = theFireBaseDB.child(getString(R.string.dbnode_chatrooms)).orderByKey();
+
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot singleSnapshot : dataSnapshot.getChildren()) {
+                    Map<String, Object> objectMap = (HashMap<String, Object>) singleSnapshot.getValue();
+                    if (objectMap.get(getString(R.string.field_chatroom_id)).toString()
+                            .equals(chatroom.getChatroom_id())) {
+                        if (mSecurityLevel >= Integer.parseInt(chatroom.getSecurity_level())) {
+                            LogHelper.LogThreadId(logName, "onItemClick: selected chatroom: " + chatroom.getChatroom_id());
+
+                            //add user to the list of users who have joined the chatroom
+                            addUserToChatroom(chatroom);
+
+                            //navigate to the chatoom
+                            Intent intent = new Intent(ActivityChat.this, ActivityChatroom.class);
+                            intent.putExtra(getString(R.string.intent_chatroom), chatroom);
+                            startActivity(intent);
+                        } else {
+                            Toast.makeText(ActivityChat.this, "insufficient security level", Toast.LENGTH_SHORT).show();
+                        }
+                        break;
+                    }
+                }
+                getChatrooms();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                LogHelper.LogThreadId(logName, "ActivityChat - Join chatroom- Cancelled retrieving chatrooms and its " +
+                        "messages from db reason : " + databaseError.getMessage() + " " + databaseError.getDetails());
+            }
+        });
+    }
+
+    /**
+     * add the current user to the list of users who have joined the chatroom.
+     * Users who have joined the chatroom will receive notifications on chatroom activity.
+     * They will receive notifications via a cloud functions sending a cloud message to the
+     * chatroom ID (Sending via topic FCM)
+     * @param chatroom
+     */
+    private void addUserToChatroom(Chatroom chatroom) {
+        theFireBaseDB = FirebaseDatabase.getInstance().getReference();
+        LogHelper.LogThreadId(logName, "addUserToChatroom : Adding users to the chatroom");
+
+        theFireBaseDB.child(getString(R.string.dbnode_chatrooms))
+                .child(chatroom.getChatroom_id())
+                .child(getString(R.string.field_users))
+                .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                .child(getString(R.string.field_last_message_seen))
+                .setValue(mNumChatroomMessages.get(chatroom.getChatroom_id()));
     }
 }

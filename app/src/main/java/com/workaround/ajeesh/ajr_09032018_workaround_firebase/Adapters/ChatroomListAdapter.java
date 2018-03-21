@@ -9,7 +9,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -57,7 +59,9 @@ public class ChatroomListAdapter extends ArrayAdapter<Chatroom> {
 
     public static class ViewHolder {
         TextView name, creatorName, numberMessages;
+        Button leaveChat;
         ImageView mProfileImage, mTrash;
+        RelativeLayout layoutContainer;
     }
 
     @NonNull
@@ -76,6 +80,9 @@ public class ChatroomListAdapter extends ArrayAdapter<Chatroom> {
             theViewHolder.numberMessages = convertView.findViewById(R.id.number_chatmessages);
             theViewHolder.mProfileImage = convertView.findViewById(R.id.profile_image);
             theViewHolder.mTrash = convertView.findViewById(R.id.icon_trash);
+            theViewHolder.leaveChat = convertView.findViewById(R.id.leave_chat);
+            theViewHolder.layoutContainer = (RelativeLayout) convertView.findViewById(R.id.layout_container);
+
             LogHelper.LogThreadId(logName, "ChatroomListAdapter - The view holder when convert view is not null : " + theViewHolder);
         } else {
             theViewHolder = (ViewHolder) convertView.getTag();
@@ -127,6 +134,37 @@ public class ChatroomListAdapter extends ArrayAdapter<Chatroom> {
                     }
                 }
             });
+
+            theViewHolder.layoutContainer.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    LogHelper.LogThreadId(logName, "onClick: navigating to chatroom");
+                    ((ActivityChat)mContext).joinChatroom(getItem(position));
+                }
+            });
+            /*
+            -------- Check if user is part of this chatroom --------
+                1) if they are: give them ability to leave it
+                2) if they aren't: hide the leave button
+            */
+            List<String> usersInChatroom = getItem(position).getUsers();
+            if(usersInChatroom.contains(FirebaseAuth.getInstance().getCurrentUser().getUid())){
+                theViewHolder.leaveChat.setVisibility(View.VISIBLE);
+
+                theViewHolder.leaveChat.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        LogHelper.LogThreadId(logName, "onClick: leaving chatroom with id: " + getItem(position).getChatroom_id());
+                        DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
+                        reference.child(mContext.getString(R.string.dbnode_chatrooms))
+                                .child(getItem(position).getChatroom_id())
+                                .child(mContext.getString(R.string.field_users))
+                                .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                                .removeValue();
+                        theViewHolder.leaveChat.setVisibility(View.GONE);
+                    }
+                });
+            }
 
         } catch (NullPointerException e) {
             LogHelper.LogThreadId(logName, "getView: NullPointerException: " + e.getCause());

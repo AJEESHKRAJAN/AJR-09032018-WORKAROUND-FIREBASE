@@ -102,4 +102,7 @@
     <string name="reply_label">intent_data_payload</string>
     <string name="label">new message...</string>
     <string name="admin">Admin</string>
+    <string name="channel_id">com.workaround.ajeesh.ajr_09032018_workaround_firebase.channel_id</string>
+    <string name="channel_name" translatable="true">com.workaround.ajeesh.ajr_09032018_workaround_firebase_channel_name</string>
+    <string name="channel_description">com.workaround.ajeesh.ajr_09032018_workaround_firebase_channel_desc</string>
 </resources>

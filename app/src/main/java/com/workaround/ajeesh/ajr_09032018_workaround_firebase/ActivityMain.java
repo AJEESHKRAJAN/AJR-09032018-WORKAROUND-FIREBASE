@@ -29,6 +29,7 @@ public class ActivityMain extends AppCompatActivity {
     private Button mSignIn;
     private ProgressBar mProgressBar;
     private ValidationHelper helper;
+    public static boolean isActivityRunning;
 
     private FirebaseAuth.AuthStateListener mFireBaseAuthListener;
 
@@ -171,6 +172,7 @@ public class ActivityMain extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         FirebaseAuth.getInstance().addAuthStateListener(mFireBaseAuthListener);
+        isActivityRunning = true;
     }
 
     @Override
@@ -179,6 +181,6 @@ public class ActivityMain extends AppCompatActivity {
         if (mFireBaseAuthListener != null) {
             FirebaseAuth.getInstance().removeAuthStateListener(mFireBaseAuthListener);
         }
-
+        isActivityRunning = false;
     }
 }

@@ -53,6 +53,7 @@ public class ActivityChatroom extends AppCompatActivity {
     private Chatroom mChatroom;
     private List<ChatMessage> mMessagesList;
     private ChatroomMessageListAdapter mAdapter;
+    public static boolean isActivityRunning;
 
 
     @Override
@@ -61,7 +62,7 @@ public class ActivityChatroom extends AppCompatActivity {
         setContentView(R.layout.activity_chatroom);
 
         theFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        theFirebaseDB  = FirebaseDatabase.getInstance().getReference();
+        theFirebaseDB = FirebaseDatabase.getInstance().getReference();
 
         mChatroomName = findViewById(R.id.text_chatroom_name);
         mListView = findViewById(R.id.listView);
@@ -330,6 +331,7 @@ public class ActivityChatroom extends AppCompatActivity {
         super.onStart();
         FirebaseAuth.getInstance().addAuthStateListener(mAuthListener);
         LogHelper.LogThreadId(logName, "ActivityChatroom - OnStart - Started");
+        isActivityRunning = true;
     }
 
     @Override
@@ -339,5 +341,6 @@ public class ActivityChatroom extends AppCompatActivity {
         if (mAuthListener != null) {
             FirebaseAuth.getInstance().removeAuthStateListener(mAuthListener);
         }
+        isActivityRunning = false;
     }
 }

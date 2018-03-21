@@ -75,6 +75,7 @@ public class ActivitySettings extends AppCompatActivity implements ChangeImageDi
     private static final String mFilePath = "images/users";
     private byte[] mBytes;
     private double mProgress;
+    public static boolean isActivityRunning;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -623,4 +624,15 @@ public class ActivitySettings extends AppCompatActivity implements ChangeImageDi
         }
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        isActivityRunning = true;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        isActivityRunning = false;
+    }
 }
