@@ -258,10 +258,16 @@ public class AjrFirebaseMessagingService extends FirebaseMessagingService {
                         PendingIntent.FLAG_UPDATE_CURRENT
                 );
 
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            builder.setSmallIcon(R.drawable.ic_notification_logo);
+            builder.setColor(getResources().getColor(R.color.colorAccent));
+        } else {
+            builder.setSmallIcon(R.drawable.ic_notification_logo);
+        }
+
         //add properties to the builder
-        builder.setSmallIcon(R.mipmap.ajsys_logo_primary)
-                .setLargeIcon(BitmapFactory.decodeResource(getApplicationContext().getResources(),
-                        R.mipmap.ajsys_logo_primary))
+        builder.setLargeIcon(BitmapFactory.decodeResource(getApplicationContext().getResources(),
+                R.drawable.ic_notification_logo))
                 .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                 .setContentTitle(title)
                 .setContentText("New messages in " + chatroom.getChatroom_name())

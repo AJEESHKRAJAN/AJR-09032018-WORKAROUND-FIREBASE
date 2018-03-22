@@ -56,6 +56,7 @@ public class ChatroomMessageListAdapter extends ArrayAdapter<ChatMessage> {
             theViewHolder.mProfileImage = convertView.findViewById(R.id.profile_image);
 
             convertView.setTag(theViewHolder);
+
             LogHelper.LogThreadId(logName, "ChatroomMessageListAdapter - The view holder when convert view is not null : " + theViewHolder);
         } else {
             theViewHolder = (ViewHolder) convertView.getTag();
