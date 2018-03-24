@@ -27,6 +27,8 @@ import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Helper.UniversalIm
 import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Logger.LogHelper;
 import com.workaround.ajeesh.ajr_09032018_workaround_firebase.Models.Chatroom;
 
+import java.util.ArrayList;
+
 public class ActivityLaunchDashboard extends AppCompatActivity {
     private static final String logName = "FIREB-ACT-DASHBOARD";
     private FirebaseAuth.AuthStateListener mAuthListener;
@@ -50,6 +52,9 @@ public class ActivityLaunchDashboard extends AppCompatActivity {
         getPendingIntent();
         initUniversalImageLoader();
         InitializeFirebaseMessagingToken();
+
+        ArrayList<String> arrrayList = null;
+        arrrayList.size();
 
         FloatingActionButton fab = findViewById(R.id.fabDashboard);
         fab.setOnClickListener(new View.OnClickListener() {
